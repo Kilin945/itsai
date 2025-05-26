@@ -1,0 +1,54 @@
+{
+    "questions": [
+        {
+            "id": 1,
+            "type": "single",
+            "question": "以下哪個是用於網頁的樣式表語言？",
+            "options": ["HTML", "CSS", "JavaScript", "Python"],
+            "answer": [2],
+            "weight": 2,
+            "image": null,
+            "explanation": "HTML（HyperText Markup Language）是用來建立網頁的結構。\nCSS（Cascading Style Sheets）是用來設計和設定網頁的樣式，例如顏色、字型、佈局等。\nJavaScript 是一種用於為網頁添加互動功能的程式語言。\nPython 是一種通用程式語言，通常不直接用於前端網頁樣式設計。\n因此，用於網頁樣式的是 CSS。"
+        },
+        {
+            "id": 2,
+            "type": "multi",
+            "question": "以下哪些是常見的 CSS 選擇器？",
+            "options": ["ID 選擇器 (#id)", "Class 選擇器 (.class)", "標籤選擇器 (tag)", "屬性選擇器 ([attribute])"],
+            "answer": [1, 2, 3, 4],
+            "weight": 3,
+            "image": null,
+            "explanation": "CSS 提供多種選擇器來選擇 HTML 元素：\n1. ID 選擇器使用 # 符號\n2. Class 選擇器使用 . 符號\n3. 標籤選擇器直接使用 HTML 標籤名稱\n4. 屬性選擇器使用 [] 包含屬性\n這些都是常用的 CSS 選擇器。"
+        },
+        {
+            "id": 3,
+            "type": "single",
+            "question": "在 RWD 設計中，以下哪個 CSS 屬性用於定義斷點？",
+            "options": ["@media", "@import", "@keyframes", "@font-face"],
+            "answer": [1],
+            "weight": 2,
+            "image": null,
+            "explanation": "@media 查詢是 RWD（響應式網頁設計）中用於定義不同螢幕尺寸下的樣式規則。\n其他選項的用途：\n@import 用於導入其他樣式表\n@keyframes 用於定義動畫\n@font-face 用於定義自訂字型"
+        },
+        {
+            "id": 4,
+            "type": "multi",
+            "question": "以下哪些是有效的 CSS 定位方式？",
+            "options": ["static", "relative", "absolute", "fixed", "sticky"],
+            "answer": [1, 2, 3, 4, 5],
+            "weight": 1,
+            "image": null,
+            "explanation": "CSS 提供以下定位方式：\nstatic：預設值，按照正常文件流定位\nrelative：相對定位，相對於原本的位置\nabsolute：絕對定位，相對於最近的定位父元素\nfixed：固定定位，相對於瀏覽器視窗\nsticky：粘性定位，在特定條件下變成固定定位"
+        },
+        {
+            "id": 5,
+            "type": "single",
+            "question": "下列哪個 HTML5 標籤用於定義導覽列？",
+            "options": ["<header>", "<nav>", "<main>", "<section>"],
+            "answer": [2],
+            "weight": 2,
+            "image": null,
+            "explanation": "<nav> 元素用於定義導覽列區域，通常包含主要的導覽連結。\n其他標籤的用途：\n<header>：用於定義頁首區域\n<main>：用於定義主要內容區域\n<section>：用於定義一個獨立的章節"
+        }
+    ]
+}

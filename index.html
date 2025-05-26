@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>網頁設計模擬試題系統</title>
+        <link rel="stylesheet" href="css/style.css" />
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+    <body>
+        <div class="header">
+            <div class="container">
+                <h1>網頁設計模擬試題系統</h1>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- 設定區塊 -->
+            <div id="settings" class="settings">
+                <div class="settings-group">
+                    <label for="maxId">題號範圍：</label>
+                    <select id="maxId">
+                        <option value="0">全部</option>
+                        <option value="1">1題</option>
+                        <option value="5">5題</option>
+                        <option value="10">10題</option>
+                        <option value="50">50題</option>
+                        <option value="100">100題</option>
+                        <option value="200">200題</option>
+                        <option value="300">300題</option>
+                    </select>
+
+                    <label for="numQuestions">題數：</label>
+                    <select id="numQuestions">
+                        <option value="5">5題</option>
+                        <option value="10">10題</option>
+                        <option value="20">20題</option>
+                        <option value="30">30題</option>
+                        <option value="50" selected>50題</option>
+                    </select>
+
+                    <button class="btn btn-next" onclick="startQuiz()">開始測驗</button>
+                    <button class="btn btn-next" onclick="downloadQuestions()">下載題庫</button>
+                </div>
+            </div>
+
+            <!-- 高權重題目列表 -->
+            <div id="weightList" class="weight-list"></div>
+
+            <!-- 測驗區塊 -->
+            <div id="quiz" style="display: none">
+                <div class="progress-bar">
+                    <div id="progress"></div>
+                    <div id="timer">0:00</div>
+                </div>
+                <div id="question"></div>
+            </div>
+
+            <!-- 結果區塊 -->
+            <div id="result" style="display: none"></div>
+        </div>
+
+        <script src="js/app.js"></script>
+    </body>
+</html>

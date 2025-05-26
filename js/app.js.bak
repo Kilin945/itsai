@@ -1,0 +1,278 @@
+// 全域變數
+let questions = [];
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let startTime = null;
+let timer = null;
+
+// DOM 元素
+const settingsSection = document.getElementById("settings");
+const quizSection = document.getElementById("quiz");
+const resultSection = document.getElementById("result");
+const weightListSection = document.getElementById("weightList");
+const progressText = document.getElementById("progress");
+const timerText = document.getElementById("timer");
+
+// 初始化
+async function init() {
+    try {
+        const response = await fetch("/data/questions.json");
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (!data || !data.questions) {
+            throw new Error("Questions data is not in the expected format");
+        }
+        questions = data.questions;
+        console.log("Loaded questions:", questions); // 用於除錯
+        showWeightedQuestions();
+    } catch (error) {
+        console.error("Error loading questions:", error);
+        alert("載入題目時發生錯誤，請確認 data/questions.json 檔案存在且格式正確");
+    }
+}
+
+// 顯示高權重題目
+function showWeightedQuestions() {
+    const weightedQuestions = questions.filter((q) => q.weight > 1).sort((a, b) => b.weight - a.weight);
+
+    if (weightedQuestions.length > 0) {
+        const list = weightedQuestions
+            .map(
+                (q) => `
+            <div class="weight-item">
+                <strong>題號 ${q.id}</strong> (權重: ${q.weight})
+                <div>${q.question}</div>
+            </div>
+        `
+            )
+            .join("");
+        weightListSection.innerHTML = `<h3>高權重題目列表</h3>${list}`;
+    }
+}
+
+// 開始測驗
+function startQuiz() {
+    const numQuestions = parseInt(document.getElementById("numQuestions").value);
+    const maxId = parseInt(document.getElementById("maxId").value);
+
+    // 根據範圍和權重篩選題目
+    let availableQuestions = maxId === 0 ? questions : questions.filter((q) => q.id <= maxId);
+
+    // 根據權重複製題目
+    let weightedPool = [];
+    availableQuestions.forEach((q) => {
+        const weight = q.weight || 1;
+        for (let i = 0; i < weight; i++) {
+            weightedPool.push(q);
+        }
+    });
+
+    // 隨機抽取題目
+    currentQuestions = [];
+    while (currentQuestions.length < numQuestions && weightedPool.length > 0) {
+        const randomIndex = Math.floor(Math.random() * weightedPool.length);
+        const selectedQuestion = weightedPool[randomIndex];
+
+        if (!currentQuestions.find((q) => q.id === selectedQuestion.id)) {
+            currentQuestions.push(selectedQuestion);
+        }
+
+        weightedPool.splice(randomIndex, 1);
+    }
+
+    // 初始化測驗
+    currentQuestionIndex = 0;
+    startTime = new Date();
+    timer = setInterval(updateTimer, 1000);
+
+    // 隱藏設定和權重列表
+    settingsSection.style.display = "none";
+    weightListSection.style.display = "none";
+    quizSection.style.display = "block";
+    resultSection.style.display = "none";
+
+    showQuestion();
+}
+
+// 顯示題目
+function showQuestion() {
+    const question = currentQuestions[currentQuestionIndex];
+    const questionContainer = document.getElementById("question");
+
+    // 更新進度
+    updateProgress();
+
+    // 建立題目 HTML
+    let html = `
+        <div style="margin-bottom: 30px">
+            <div style="font-size: 18px; margin-bottom: 10px; font-weight: bold">
+                第 ${currentQuestionIndex + 1}/${currentQuestions.length} 題：
+            </div>
+            <div style="font-size: 16px; margin-bottom: 20px">
+                ${question.question}
+            </div>
+            <div class="options" style="margin: 20px 0">`;
+    
+    // 建立選項
+    question.options.forEach((option, index) => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'option';
+        
+        const input = document.createElement('input');
+        input.type = question.type === "single" ? "radio" : "checkbox";
+        input.name = "answer";
+        input.value = index + 1;
+        input.id = `option${index + 1}`;
+        
+        const label = document.createElement('label');
+        label.htmlFor = `option${index + 1}`;
+        label.textContent = option;
+        
+        optionDiv.appendChild(input);
+        optionDiv.appendChild(label);
+        optionsDiv.appendChild(optionDiv);
+    });
+    
+    questionContainer.appendChild(optionsDiv);
+    });
+
+    html += `
+        </div>
+        <button class="btn btn-submit" onclick="submitAnswer()">提交答案</button>
+    `;
+
+    questionContainer.innerHTML = html;
+}
+
+// 更新進度
+function updateProgress() {
+    const progress = `第 ${currentQuestionIndex + 1}/${currentQuestions.length} 題 (${Math.round(
+        ((currentQuestionIndex + 1) / currentQuestions.length) * 100
+    )}%)`;
+    progressText.textContent = progress;
+}
+
+// 更新計時器
+function updateTimer() {
+    const now = new Date();
+    const diff = Math.floor((now - startTime) / 1000);
+    const minutes = Math.floor(diff / 60);
+    const seconds = diff % 60;
+    timerText.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+// 提交答案
+function submitAnswer() {
+    const question = currentQuestions[currentQuestionIndex];
+    const selectedInputs = document.querySelectorAll('input[name="answer"]:checked');
+    const selectedAnswers = Array.from(selectedInputs).map((input) => parseInt(input.value));
+
+    // 檢查答案
+    const isCorrect =
+        question.answer.every((answer) => selectedAnswers.includes(answer)) &&
+        selectedAnswers.length === question.answer.length;
+
+    // 顯示結果
+    const questionContainer = document.getElementById("question");
+    questionContainer.innerHTML += `
+        <div class="result-feedback" style="margin-top: 20px;">
+            <div style="color: ${isCorrect ? "#28a745" : "#dc3545"}">
+                ${isCorrect ? "答對了！" : "答錯了！"}
+            </div>
+            <div class="explanation">${question.explanation}</div>
+            <button class="btn btn-next" onclick="nextQuestion()">繼續</button>
+        </div>
+    `;
+
+    // 禁用所有選項和提交按鈕
+    document.querySelectorAll('input[name="answer"]').forEach((input) => (input.disabled = true));
+    document.querySelector(".btn-submit").style.display = "none";
+}
+
+// 下一題
+function nextQuestion() {
+    if (currentQuestionIndex < currentQuestions.length - 1) {
+        currentQuestionIndex++;
+        showQuestion();
+    } else {
+        showResult();
+    }
+}
+
+// 顯示結果
+function showResult() {
+    clearInterval(timer);
+
+    quizSection.style.display = "none";
+    resultSection.style.display = "block"; // 計算分數
+    const correctAnswers = currentQuestions.filter((q, index) => {
+        const selectedAnswers = document.querySelectorAll(`input[name="answer"]:checked`);
+        const selectedValues = Array.from(selectedAnswers).map((input) => parseInt(input.value));
+        return q.answer.every((answer) => selectedValues.includes(answer)) && selectedValues.length === q.answer.length;
+    });
+
+    const score = Math.round((correctAnswers.length / currentQuestions.length) * 100);
+
+    // 顯示分數和計時
+    const timeSpent = timerText.textContent;
+    resultSection.innerHTML = `
+        <div class="score">得分：${score}分</div>
+        <div>總用時：${timeSpent}</div>
+        <canvas id="scoreChart" class="chart"></canvas>
+        <button class="btn btn-next" onclick="location.reload()">再測驗一次</button>
+    `;
+
+    // 繪製圓餅圖
+    drawScoreChart(score);
+}
+
+// 繪製圓餅圖
+function drawScoreChart(score) {
+    const ctx = document.getElementById("scoreChart").getContext("2d");
+    const data = {
+        datasets: [
+            {
+                data: [score, 100 - score],
+                backgroundColor: ["#28a745", "#dc3545"],
+            },
+        ],
+    };
+
+    new Chart(ctx, {
+        type: "doughnut",
+        data: data,
+        options: {
+            cutout: "70%",
+            plugins: {
+                legend: {
+                    display: false,
+                },
+            },
+        },
+    });
+}
+
+// 下載題庫
+function downloadQuestions() {
+    const jsonStr = JSON.stringify({ questions }, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "questions.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// 輔助函數：比較兩個陣列是否相等
+function arraysEqual(a, b) {
+    if (a.length !== b.length) return false;
+    return a.every((val, index) => val === b[index]);
+}
+
+// 頁面載入時初始化
+document.addEventListener("DOMContentLoaded", init);
